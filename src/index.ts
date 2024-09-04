@@ -1,6 +1,6 @@
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { addScheduledJob } from "./queue";
+import { addScheduledJob } from "./queue"; // Adjust import path if needed
 
 const app = new Hono();
 
@@ -17,13 +17,12 @@ app.post("/schedule-job", async (c) => {
   if (typeof timestamp !== "number" || isNaN(timestamp)) {
     return c.json({ error: "Invalid timestamp" }, 400);
   }
-  console.log(timestamp);
 
   try {
     await addScheduledJob(timestamp);
     return c.json({ message: "Job scheduled successfully!" });
   } catch (error) {
-    return c.json({ message: error }, 400);
+    return c.json({ error}, 400);
   }
 });
 
