@@ -1,5 +1,5 @@
 import { Worker } from "bullmq";
-import Redis from "ioredis"; // Ensure ioredis is installed
+import Redis from "ioredis";
 
 // Create a Redis connection
 const redis = new Redis({
