@@ -1,0 +1,16 @@
+{
+  "name": "hono-BullMQ",
+  "scripts": {
+    "dev": "tsx watch src/index.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.12.2",
+    "bullmq": "^5.12.13",
+    "hono": "^4.5.11",
+    "ioredis": "^5.4.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.17",
+    "tsx": "^4.7.1"
+  }
+}
