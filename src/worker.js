@@ -37,18 +37,21 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.worker = void 0;
+//worker.ts
 var bullmq_1 = require("bullmq");
 var ioredis_1 = require("ioredis"); // Ensure ioredis is installed
 // Create a Redis connection
 var redis = new ioredis_1.default({
-    host: "localhost", // Replace with your Redis server's host
+    host: "127.0.0.1", // Replace with your Redis server's host
     port: 6379, // Replace with your Redis server's port
-    // password: 'your_password', // Uncomment if Redis requires authentication
+    maxRetriesPerRequest: null, // Set to null as required by BullMQ
 });
 // Create a worker to process jobs from the queue
-var worker = new bullmq_1.Worker("scheduledJobs", function (job) { return __awaiter(void 0, void 0, void 0, function () {
+var worker = new bullmq_1.Worker("scheduledJobs", // Ensure this matches the queue name in queue.ts
+function (job) { return __awaiter(void 0, void 0, void 0, function () {
     var scheduledTimestamp, currentTimestamp;
     return __generator(this, function (_a) {
+        console.log("Worker processing job:", job.id);
         scheduledTimestamp = job.data.scheduledTimestamp;
         currentTimestamp = Date.now();
         console.log("Scheduled Timestamp:", new Date(scheduledTimestamp).toLocaleString());

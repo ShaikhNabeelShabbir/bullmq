@@ -1,16 +1,19 @@
+//worker.ts
 import { Worker } from "bullmq";
 import Redis from "ioredis"; // Ensure ioredis is installed
 
 // Create a Redis connection
 const redis = new Redis({
-  host: "localhost", // Replace with your Redis server's host
+  host: "127.0.0.1", // Replace with your Redis server's host
   port: 6379, // Replace with your Redis server's port
+  maxRetriesPerRequest: null, // Set to null as required by BullMQ
 });
 
 // Create a worker to process jobs from the queue
 const worker = new Worker(
-  "scheduledJobs",
+  "scheduledJobs", // Ensure this matches the queue name in queue.ts
   async (job) => {
+    console.log("Worker processing job:", job.id);
     const { scheduledTimestamp } = job.data;
     const currentTimestamp = Date.now();
 
