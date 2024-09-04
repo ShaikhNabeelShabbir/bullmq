@@ -9,14 +9,17 @@ const dbPromise = open({
 
 export default dbPromise;
 
-// Create the users and tokens tables if they don't exist yet
-
+// Create the jobs table if it doesn't exist yet
 (async () => {
-  const db: Database<sqlite3.Database, sqlite3.Statement> = await dbPromise;
-  await db.exec(`
-    CREATE TABLE IF NOT EXISTS jobs (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      timestamp integer UNIQUE,
-    );
-  `);
+  try {
+    const db: Database<sqlite3.Database, sqlite3.Statement> = await dbPromise;
+    await db.exec(`
+      CREATE TABLE IF NOT EXISTS jobs (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        timestamp INTEGER UNIQUE
+      );
+    `);
+  } catch (error) {
+    console.error("Error initializing the database:", error);
+  }
 })();
