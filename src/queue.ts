@@ -1,12 +1,11 @@
-//queue.ts
 import { Queue } from "bullmq";
-import Redis from "ioredis"; // Ensure ioredis is installed
+import Redis from "ioredis"; 
 
 // Create a Redis connection
 const redis = new Redis({
-  host: "127.0.0.1", // Replace with your Redis server's host
-  port: 6379, // Replace with your Redis server's port
-  maxRetriesPerRequest: null, // Set to null as required by BullMQ
+  host: "127.0.0.1",
+  port: 6379,
+  maxRetriesPerRequest: null,
 });
 
 // Create a queue

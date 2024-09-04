@@ -1,4 +1,3 @@
-//worker.ts
 import { Worker } from "bullmq";
 import Redis from "ioredis"; // Ensure ioredis is installed
 
