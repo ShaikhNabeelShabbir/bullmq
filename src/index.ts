@@ -1,6 +1,7 @@
+// src/index.ts
 import { serve } from "@hono/node-server";
 import { Hono } from "hono";
-import { addScheduledJob } from "./queue"; 
+import { authRoutes } from "./authRoutes";
 
 const app = new Hono();
 
@@ -9,26 +10,8 @@ app.get("/", (c) => {
   return c.text("Hello Hono how are you!");
 });
 
-// Endpoint to schedule a job
-app.post("/schedule-job", async (c) => {
-  const { timestamp } = await c.req.json();
-
-  if (typeof timestamp !== "number" || isNaN(timestamp)) {
-    return c.json({ error: "Invalid timestamp" }, 400);
-  }
-
-  try {
-    await addScheduledJob(timestamp);
-    console.log(
-      "Job scheduled with timestamp:",
-      new Date(timestamp).toLocaleString()
-    );
-    return c.json({ message: "Job scheduled successfully!" });
-  } catch (error) {
-    console.error("Error scheduling job:", error);
-    return c.json({ error }, 400);
-  }
-});
+// Use the auth routes
+app.route("/", authRoutes);
 
 const port = 3000;
 console.log(`Server is running on port ${port}`);

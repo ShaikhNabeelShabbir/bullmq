@@ -7,7 +7,9 @@
     "@hono/node-server": "^1.12.2",
     "bullmq": "^5.12.13",
     "hono": "^4.5.11",
-    "ioredis": "^5.4.1"
+    "ioredis": "^5.4.1",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
