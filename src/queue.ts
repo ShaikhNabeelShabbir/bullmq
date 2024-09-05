@@ -1,5 +1,6 @@
 import { Queue } from "bullmq";
-import Redis from "ioredis"; 
+import Redis from "ioredis";
+import { log } from "util";
 
 // Create a Redis connection
 const redis = new Redis({
@@ -34,6 +35,20 @@ export async function addScheduledJob(timestamp: number) {
     { message: "This is a scheduled job!", scheduledTimestamp: timestamp },
     { delay }
   );
+}
+
+// Function to remove a scheduled job from the queue by its timestamp
+export async function removeScheduledJob(timestamp: number) {
+  console.log("Removing job with Timestamp:", timestamp);
+  console.log("timestamp string", String(timestamp));
+
+  if (timestamp) {
+    await myQueue.remove(String(timestamp));
+    console.log("Job removed successfully:",timestamp);
+  } else {
+    console.log("No job found with the given timestamp.");
+    throw new Error("Job not found");
+  }
 }
 
 export { myQueue };

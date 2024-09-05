@@ -16,3 +16,12 @@ export const createJob = async (timestamp: number): Promise<void> => {
     console.error("Error creating job:", error);
   }
 };
+
+export const deleteJob = async (timestamp: number): Promise<void> => {
+  const db = await dbPromise;
+  await db.run("DELETE FROM jobs WHERE timestamp = ?", timestamp);
+  console.log(
+    `hello from after database query Job with timestamp ${timestamp} deleted 
+    successfully and removed from the database.`
+  );
+};
