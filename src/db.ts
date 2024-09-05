@@ -16,7 +16,7 @@ export default dbPromise;
     await db.exec(`
       CREATE TABLE IF NOT EXISTS jobs (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        timestamp INTEGER UNIQUE
+        timestamp INTEGER 
       );
     `);
   } catch (error) {
