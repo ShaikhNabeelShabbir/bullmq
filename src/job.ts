@@ -25,3 +25,26 @@ export const deleteJob = async (timestamp: number): Promise<void> => {
     successfully and removed from the database.`
   );
 };
+
+// Function to update the timestamp of a job in the database
+export const updateJobInDatabase = async (
+  oldTimestamp: number,
+  newTimestamp: number
+): Promise<void> => {
+  try {
+    const db = await dbPromise;
+
+    // Update the job's timestamp
+    await db.run(
+      "UPDATE jobs SET timestamp = ? WHERE timestamp = ?",
+      newTimestamp,
+      oldTimestamp
+    );
+    console.log(
+      `Job with old timestamp ${oldTimestamp} successfully updated to ${newTimestamp} in the database.`
+    );
+  } catch (error) {
+    console.error("Error updating job in the database:", error);
+    throw error;
+  }
+};

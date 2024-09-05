@@ -1,5 +1,5 @@
 import { addScheduledJob, removeScheduledJob } from "./queue";
-import { createJob, deleteJob } from "./job";
+import { createJob, deleteJob, updateJobInDatabase } from "./job";
 import { Context } from "hono";
 
 export async function scheduleJobController(c: Context) {
@@ -67,5 +67,38 @@ export const handleDeleteJob = async (c: Context): Promise<Response> => {
 
     // Return failure response
     return c.json({ error: "Failed to delete job" }, 500);
+  }
+};
+
+export const handleUpdateJob = async (c: Context): Promise<Response> => {
+  // Get the old and new timestamps from request parameters
+  const { oldTimestamp } = await c.req.json();
+  const { newTimestamp } = await c.req.json();
+
+  // Validate that the timestamps are valid numbers
+  if (isNaN(oldTimestamp) || isNaN(newTimestamp)) {
+    return c.json({ error: "Invalid timestamp format" }, 400);
+  }
+
+  try {
+    // Remove the existing job using the old timestamp
+    await removeScheduledJob(oldTimestamp);
+    console.log("Job removed from BullMQ");
+
+    // Add a new job with the updated timestamp
+    await addScheduledJob(newTimestamp);
+    console.log("New job added to BullMQ");
+
+    // Update the timestamp in the database
+    await updateJobInDatabase(oldTimestamp, newTimestamp);
+    console.log("Job timestamp updated in the database");
+
+    // Return success response
+    return c.json({ message: "Job updated successfully" });
+  } catch (error) {
+    console.error("Error updating job:", error);
+
+    // Return failure response
+    return c.json({ error: "Failed to update job" }, 500);
   }
 };
