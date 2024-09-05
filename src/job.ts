@@ -28,8 +28,8 @@ export const deleteJob = async (jobId: string): Promise<void> => {
 };
 
 export const updateJobInDatabase = async (
-  oldJobId: number,
-  newJobId: number,
+  oldJobId: string,
+  newJobId: string,
   newTimestamp: number
 ): Promise<void> => {
   try {

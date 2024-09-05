@@ -63,43 +63,43 @@ export const handleDeleteJob = async (c: Context): Promise<Response> => {
   }
 };
 
-// export const handleUpdateJob = async (c: Context): Promise<Response> => {
-//   const { oldJobId, newTimestamp, newJobId } = await c.req.json();
+export const handleUpdateJob = async (c: Context): Promise<Response> => {
+  const { oldJobId, newTimestamp, newJobId } = await c.req.json();
 
-//   console.log("Received oldJobId: ", oldJobId);
-//   console.log("Received newJobId: ", newJobId);
-//   console.log("Received newTimestamp: ", newTimestamp);
+  console.log("Received oldJobId: ", oldJobId);
+  console.log("Received newJobId: ", newJobId);
+  console.log("Received newTimestamp: ", newTimestamp);
 
-//   // Validate if all required fields are provided and are valid
-//   if (
-//     !oldJobId ||
-//     typeof oldJobId !== "string" ||
-//     !newJobId ||
-//     typeof newJobId !== "string" ||
-//     typeof newTimestamp !== "number"
-//   ) {
-//     return c.json({ error: "Missing or invalid fields" }, 400);
-//   }
+  // Validate if all required fields are provided and are valid
+  if (
+    !oldJobId ||
+    typeof oldJobId !== "string" ||
+    !newJobId ||
+    typeof newJobId !== "string" ||
+    typeof newTimestamp !== "number"
+  ) {
+    return c.json({ error: "Missing or invalid fields" }, 400);
+  }
 
-//   try {
-//     // Remove the existing job using the old job ID
-//     await removeScheduledJobById(oldJobId);
-//     console.log("Job removed from BullMQ");
+  try {
+    // Remove the existing job using the old job ID
+    await removeScheduledJobById(oldJobId);
+    console.log("Job removed from BullMQ");
 
-//     // Add a new job with the updated timestamp and new job ID
-//     await addScheduledJob(newTimestamp);
-//     console.log("New job added to BullMQ");
+    // Add a new job with the updated timestamp and new job ID
+    await addScheduledJob(newTimestamp);
+    console.log("New job added to BullMQ");
 
-//     // Update the timestamp and job ID in the database
-//     await updateJobInDatabase(oldJobId, newJobId, newTimestamp);
-//     console.log("Job timestamp and ID updated in the database");
+    // Update the timestamp and job ID in the database
+    await updateJobInDatabase(oldJobId, newJobId, newTimestamp);
+    console.log("Job timestamp and ID updated in the database");
 
-//     // Return success response
-//     return c.json({ message: "Job updated successfully" });
-//   } catch (error) {
-//     console.error("Error updating job:", error);
+    // Return success response
+    return c.json({ message: "Job updated successfully" });
+  } catch (error) {
+    console.error("Error updating job:", error);
 
-//     // Return failure response
-//     return c.json({ error: "Failed to update job" }, 500);
-//   }
-// };
+    // Return failure response
+    return c.json({ error: "Failed to update job" }, 500);
+  }
+};

@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import {
   handleDeleteJob,
-  //handleUpdateJob,
+  handleUpdateJob,
   scheduleJobController,
 } from "./authController";
 
@@ -14,6 +14,6 @@ authRoutes.post("/schedule-job", scheduleJobController);
 authRoutes.delete("/schedule-job", handleDeleteJob); // Remove `:timestamp` as jobId is used
 
 // Route to update a job (PATCH request with JSON body)
-//authRoutes.patch("/schedule-job", handleUpdateJob);
+authRoutes.patch("/schedule-job", handleUpdateJob);
 
 export { authRoutes };
