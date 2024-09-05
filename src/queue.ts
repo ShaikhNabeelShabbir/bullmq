@@ -13,7 +13,7 @@ const redis = new Redis({
 const myQueue = new Queue("scheduledJobs", { connection: redis });
 
 // Function to add a scheduled job to the queue
-export async function addScheduledJob(timestamp: number) {
+export async function addScheduledJob(timestamp: number): Promise<string> {
   console.log("Requested Timestamp:", new Date(timestamp).toLocaleString());
 
   const currentTime = Date.now();
@@ -30,23 +30,39 @@ export async function addScheduledJob(timestamp: number) {
   }
 
   // Add a job with the specified delay and include the scheduled timestamp
-  await myQueue.add(
+  const job = await myQueue.add(
     "scheduledJob",
     { message: "This is a scheduled job!", scheduledTimestamp: timestamp },
     { delay }
   );
+
+  console.log("Job added with ID:", job.id);
+  return job.id as string;
 }
 
-// Function to remove a scheduled job from the queue by its timestamp
-export async function removeScheduledJob(timestamp: number) {
-  console.log("Removing job with Timestamp:", timestamp);
-  console.log("timestamp string", String(timestamp));
+// Function to remove a scheduled job from the queue by its ID
+export async function removeScheduledJobById(jobId: string) {
+  console.log("Removing job with ID:", jobId);
 
-  if (timestamp) {
-    await myQueue.remove(String(timestamp));
-    console.log("Job removed successfully:",timestamp);
+  if (jobId) {
+    await myQueue.remove(jobId);
+    console.log("Job removed successfully:", jobId);
   } else {
-    console.log("No job found with the given timestamp.");
+    console.log("No job found with the given ID.");
+    throw new Error("Job not found");
+  }
+}
+
+// Function to get a job by ID
+export async function getJobById(jobId: string) {
+  console.log("Getting job with ID:", jobId);
+
+  const job = await myQueue.getJob(jobId);
+  if (job) {
+    console.log("Job found:", job);
+    return job;
+  } else {
+    console.log("No job found with the given ID.");
     throw new Error("Job not found");
   }
 }

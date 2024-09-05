@@ -1,6 +1,6 @@
-import { addScheduledJob, removeScheduledJob } from "./queue";
-import { createJob, deleteJob, updateJobInDatabase } from "./job";
 import { Context } from "hono";
+import { createJob, deleteJob, updateJobInDatabase } from "./job";
+import { addScheduledJob, removeScheduledJobById } from "./queue";
 
 export async function scheduleJobController(c: Context) {
   const { timestamp } = await c.req.json();
@@ -11,19 +11,22 @@ export async function scheduleJobController(c: Context) {
   }
 
   try {
-    // Add the job to BullMQ queue
-    await addScheduledJob(timestamp);
+    // Add the job to BullMQ queue and get the job ID
+    const jobId = await addScheduledJob(timestamp);
 
-    // Add the job to the database
+    // Add the job to the database with the generated job ID
     await createJob(timestamp);
 
     console.log(
       "Job scheduled with timestamp:",
-      new Date(timestamp).toLocaleString()
+      new Date(timestamp).toLocaleString(),
+      "and ID:",
+      jobId
     );
 
     return c.json({
       message: "Job scheduled and saved to the database successfully!",
+      jobId,
     });
   } catch (error) {
     console.error("Error scheduling job:", error);
@@ -32,32 +35,22 @@ export async function scheduleJobController(c: Context) {
 }
 
 export const handleDeleteJob = async (c: Context): Promise<Response> => {
-  // Get the 'timestamp' from URL parameters
-  const timestamp = c.req.param("timestamp");
-  console.log("Received timestamp: ", timestamp);
+  const { jobId } = await c.req.json();
 
-  // Check if the timestamp exists in the request
-  if (!timestamp) {
-    return c.json({ error: "Missing required fields" }, 400);
+  console.log("Received jobId: ", jobId);
+
+  // Check if the jobId exists in the request
+  if (!jobId || typeof jobId !== "string") {
+    return c.json({ error: "Missing or invalid job ID" }, 400);
   }
-
-  // Convert the timestamp to a number
-  const timestampNum = Number(timestamp);
-
-  // Validate that the timestamp is a valid number
-  if (isNaN(timestampNum)) {
-    return c.json({ error: "Invalid timestamp format" }, 400);
-  }
-
-  console.log("Converted timestamp to number: ", timestampNum);
 
   try {
-    // Call the removeScheduledJob function to remove the job from BullMQ
-    await removeScheduledJob(timestampNum);
+    // Remove the job using the job ID
+    await removeScheduledJobById(jobId);
     console.log("Job removed from BullMQ");
 
-    // Call the deleteJob function to remove the job from the database
-    await deleteJob(timestampNum);
+    // Remove the job from the database
+    await deleteJob(jobId);
     console.log("Job removed from the database");
 
     // Return success response
@@ -70,35 +63,43 @@ export const handleDeleteJob = async (c: Context): Promise<Response> => {
   }
 };
 
-export const handleUpdateJob = async (c: Context): Promise<Response> => {
-  // Get the old and new timestamps from request parameters
-  const { oldTimestamp } = await c.req.json();
-  const { newTimestamp } = await c.req.json();
+// export const handleUpdateJob = async (c: Context): Promise<Response> => {
+//   const { oldJobId, newTimestamp, newJobId } = await c.req.json();
 
-  // Validate that the timestamps are valid numbers
-  if (isNaN(oldTimestamp) || isNaN(newTimestamp)) {
-    return c.json({ error: "Invalid timestamp format" }, 400);
-  }
+//   console.log("Received oldJobId: ", oldJobId);
+//   console.log("Received newJobId: ", newJobId);
+//   console.log("Received newTimestamp: ", newTimestamp);
 
-  try {
-    // Remove the existing job using the old timestamp
-    await removeScheduledJob(oldTimestamp);
-    console.log("Job removed from BullMQ");
+//   // Validate if all required fields are provided and are valid
+//   if (
+//     !oldJobId ||
+//     typeof oldJobId !== "string" ||
+//     !newJobId ||
+//     typeof newJobId !== "string" ||
+//     typeof newTimestamp !== "number"
+//   ) {
+//     return c.json({ error: "Missing or invalid fields" }, 400);
+//   }
 
-    // Add a new job with the updated timestamp
-    await addScheduledJob(newTimestamp);
-    console.log("New job added to BullMQ");
+//   try {
+//     // Remove the existing job using the old job ID
+//     await removeScheduledJobById(oldJobId);
+//     console.log("Job removed from BullMQ");
 
-    // Update the timestamp in the database
-    await updateJobInDatabase(oldTimestamp, newTimestamp);
-    console.log("Job timestamp updated in the database");
+//     // Add a new job with the updated timestamp and new job ID
+//     await addScheduledJob(newTimestamp);
+//     console.log("New job added to BullMQ");
 
-    // Return success response
-    return c.json({ message: "Job updated successfully" });
-  } catch (error) {
-    console.error("Error updating job:", error);
+//     // Update the timestamp and job ID in the database
+//     await updateJobInDatabase(oldJobId, newJobId, newTimestamp);
+//     console.log("Job timestamp and ID updated in the database");
 
-    // Return failure response
-    return c.json({ error: "Failed to update job" }, 500);
-  }
-};
+//     // Return success response
+//     return c.json({ message: "Job updated successfully" });
+//   } catch (error) {
+//     console.error("Error updating job:", error);
+
+//     // Return failure response
+//     return c.json({ error: "Failed to update job" }, 500);
+//   }
+// };

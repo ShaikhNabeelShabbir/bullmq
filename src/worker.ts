@@ -24,7 +24,12 @@ const worker = new Worker(
       "Current Timestamp:",
       new Date(currentTimestamp).toLocaleString()
     );
-    console.log("Processing job with message:", job.data.message);
+    console.log(
+      "Processing job with message:",
+      job.data.message,
+      "id:",
+      job.data.id
+    );
   },
   { connection: redis }
 );
