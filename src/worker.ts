@@ -3,8 +3,7 @@ import Redis from "ioredis";
 import fetch from "node-fetch";
 
 // Your Telegram bot token
-const TELEGRAM_BOT_TOKEN = "7232054330:AAEjk4TxKQc8CNbceKuiOhWVHl1cd-HSYZ0";
-
+const TELEGRAM_BOT_TOKEN=String(process.env.DATABASE_FILENAME)
 // Create a Redis connection
 const redis = new Redis({
   host: "127.0.0.1", // Replace with your Redis server's host
