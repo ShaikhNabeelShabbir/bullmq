@@ -3,16 +3,21 @@ import { createJob, deleteJob, updateJobInDatabase } from "./job";
 import { addScheduledJob, removeScheduledJobById } from "./queue";
 
 export async function scheduleJobController(c: Context) {
-  const { timestamp } = await c.req.json();
+  // Parse and validate input
+  const { timestamp, telegram_user_id } = await c.req.json();
+  console.log("telegram_user_id ; ", telegram_user_id);
 
-  // Validate the timestamp
   if (typeof timestamp !== "number" || isNaN(timestamp)) {
     return c.json({ error: "Invalid timestamp" }, 400);
   }
 
+  if (!telegram_user_id || typeof telegram_user_id !== "string") {
+    return c.json({ error: "Invalid Telegram user ID" }, 400);
+  }
+
   try {
     // Add the job to BullMQ queue and get the job ID
-    const jobId = await addScheduledJob(timestamp);
+    const jobId = await addScheduledJob(timestamp, telegram_user_id);
 
     // Add the job to the database with the generated job ID
     await createJob(timestamp);
@@ -64,7 +69,8 @@ export const handleDeleteJob = async (c: Context): Promise<Response> => {
 };
 
 export const handleUpdateJob = async (c: Context): Promise<Response> => {
-  const { oldJobId, newTimestamp, newJobId } = await c.req.json();
+  const { oldJobId, newTimestamp, newJobId, telegram_user_id } =
+    await c.req.json();
 
   console.log("Received oldJobId: ", oldJobId);
   console.log("Received newJobId: ", newJobId);
@@ -87,7 +93,7 @@ export const handleUpdateJob = async (c: Context): Promise<Response> => {
     console.log("Job removed from BullMQ");
 
     // Add a new job with the updated timestamp and new job ID
-    await addScheduledJob(newTimestamp);
+    await addScheduledJob(newTimestamp, telegram_user_id);
     console.log("New job added to BullMQ");
 
     // Update the timestamp and job ID in the database

@@ -37,9 +37,11 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.worker = void 0;
-//worker.ts
 var bullmq_1 = require("bullmq");
-var ioredis_1 = require("ioredis"); // Ensure ioredis is installed
+var ioredis_1 = require("ioredis");
+var node_fetch_1 = require("node-fetch");
+// Your Telegram bot token
+var TELEGRAM_BOT_TOKEN = "7232054330:AAEjk4TxKQc8CNbceKuiOhWVHl1cd-HSYZ0";
 // Create a Redis connection
 var redis = new ioredis_1.default({
     host: "127.0.0.1", // Replace with your Redis server's host
@@ -49,15 +51,49 @@ var redis = new ioredis_1.default({
 // Create a worker to process jobs from the queue
 var worker = new bullmq_1.Worker("scheduledJobs", // Ensure this matches the queue name in queue.ts
 function (job) { return __awaiter(void 0, void 0, void 0, function () {
-    var scheduledTimestamp, currentTimestamp;
-    return __generator(this, function (_a) {
-        console.log("Worker processing job:", job.id);
-        scheduledTimestamp = job.data.scheduledTimestamp;
-        currentTimestamp = Date.now();
-        console.log("Scheduled Timestamp:", new Date(scheduledTimestamp).toLocaleString());
-        console.log("Current Timestamp:", new Date(currentTimestamp).toLocaleString());
-        console.log("Processing job with message:", job.data.message);
-        return [2 /*return*/];
+    var _a, scheduledTimestamp, telegram_user_id, message, currentTimestamp, url, response, result, error_1;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                console.log("Worker processing job:", job.id);
+                _a = job.data, scheduledTimestamp = _a.scheduledTimestamp, telegram_user_id = _a.telegram_user_id, message = _a.message;
+                currentTimestamp = Date.now();
+                console.log("Scheduled Timestamp:", new Date(scheduledTimestamp).toLocaleString());
+                console.log("Current Timestamp:", new Date(currentTimestamp).toLocaleString());
+                url = "https://api.telegram.org/bot".concat(TELEGRAM_BOT_TOKEN, "/sendMessage");
+                _b.label = 1;
+            case 1:
+                _b.trys.push([1, 4, , 5]);
+                return [4 /*yield*/, (0, node_fetch_1.default)(url, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            chat_id: telegram_user_id, // Send to the provided Telegram user ID
+                            text: message || "Hello! This is a scheduled message.", // Default message
+                        }),
+                    })];
+            case 2:
+                response = _b.sent();
+                return [4 /*yield*/, response.json()];
+            case 3:
+                result = _b.sent();
+                if (result.ok) {
+                    console.log("Message sent successfully:", result);
+                }
+                else {
+                    console.error("Failed to send message:", result);
+                }
+                return [3 /*break*/, 5];
+            case 4:
+                error_1 = _b.sent();
+                console.error("Error sending message to Telegram:", error_1);
+                return [3 /*break*/, 5];
+            case 5:
+                console.log("Processing job with message:", message, "id:", job.id);
+                return [2 /*return*/];
+        }
     });
 }); }, { connection: redis });
 exports.worker = worker;

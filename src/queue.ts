@@ -1,6 +1,5 @@
 import { Queue } from "bullmq";
 import Redis from "ioredis";
-import { log } from "util";
 
 // Create a Redis connection
 const redis = new Redis({
@@ -13,7 +12,10 @@ const redis = new Redis({
 const myQueue = new Queue("scheduledJobs", { connection: redis });
 
 // Function to add a scheduled job to the queue
-export async function addScheduledJob(timestamp: number): Promise<string> {
+export async function addScheduledJob(
+  timestamp: number,
+  telegram_user_id: string
+): Promise<string> {
   console.log("Requested Timestamp:", new Date(timestamp).toLocaleString());
 
   const currentTime = Date.now();
@@ -32,7 +34,11 @@ export async function addScheduledJob(timestamp: number): Promise<string> {
   // Add a job with the specified delay and include the scheduled timestamp
   const job = await myQueue.add(
     "scheduledJob",
-    { message: "This is a scheduled job!", scheduledTimestamp: timestamp },
+    {
+      message: "Hello from the scheduled job!", // Message to send
+      scheduledTimestamp: timestamp, // Job's timestamp
+      telegram_user_id: telegram_user_id, // Replace with the actual Telegram chat ID
+    },
     { delay }
   );
 
@@ -44,8 +50,9 @@ export async function addScheduledJob(timestamp: number): Promise<string> {
 export async function removeScheduledJobById(jobId: string) {
   console.log("Removing job with ID:", jobId);
 
-  if (jobId) {
-    await myQueue.remove(jobId);
+  const job = await myQueue.getJob(jobId);
+  if (job) {
+    await job.remove(); // Corrected: remove() is on the job, not the queue
     console.log("Job removed successfully:", jobId);
   } else {
     console.log("No job found with the given ID.");
