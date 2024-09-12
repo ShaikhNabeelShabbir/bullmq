@@ -3,28 +3,31 @@ import { createJob, deleteJob, updateJobInDatabase } from "./job";
 import { addScheduledJob, removeScheduledJobById } from "./queue";
 
 export async function scheduleJobController(c: Context) {
-  // Parse and validate input
-  const { timestamp, telegram_user_id } = await c.req.json();
-  console.log("telegram_user_id ; ", telegram_user_id);
+  const { timestamp, telegram_user_id, message } = await c.req.json();
 
-  if (typeof timestamp !== "number" || isNaN(timestamp)) {
-    return c.json({ error: "Invalid timestamp" }, 400);
+  // Validate telegram_user_id
+  if (!telegram_user_id) {
+    return c.json({ error: "Missing telegram_user_id" }, 400);
   }
 
-  if (!telegram_user_id || typeof telegram_user_id !== "string") {
-    return c.json({ error: "Invalid Telegram user ID" }, 400);
-  }
+  // Set default timestamp to 1 minute in the future if not provided
+  const scheduledTimestamp = timestamp || Date.now() + 60 * 1000;
+
+  console.log(
+    "Job will be scheduled for timestamp:",
+    new Date(scheduledTimestamp).toLocaleString()
+  );
 
   try {
     // Add the job to BullMQ queue and get the job ID
-    const jobId = await addScheduledJob(timestamp, telegram_user_id);
+    const jobId = await addScheduledJob(scheduledTimestamp, telegram_user_id);
 
     // Add the job to the database with the generated job ID
-    await createJob(timestamp);
+    await createJob(scheduledTimestamp);
 
     console.log(
       "Job scheduled with timestamp:",
-      new Date(timestamp).toLocaleString(),
+      new Date(scheduledTimestamp).toLocaleString(),
       "and ID:",
       jobId
     );
